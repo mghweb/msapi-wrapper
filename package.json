@@ -1,0 +1,28 @@
+{
+	"name": "msapi-wrapper",
+	"version": "0.1.0",
+	"description": "Just a Miva Search Wrapper for JavaScript client-side or NodeJS applications...",
+	"main": "./dist/msapi-wrapper.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"build": "webpack --config webpack.prod.js",
+		"start": "webpack-dev-server --config webpack.dev.js"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/mghweb/msapi-wrapper"
+	},
+	"devDependencies": {
+		"@babel/core": "^7.1.2",
+		"@babel/preset-env": "^7.1.0",
+		"babel-loader": "^8.0.4",
+		"uglifyjs-webpack-plugin": "^2.0.1",
+		"webpack": "^4.23.1",
+		"webpack-cli": "^3.1.2",
+		"webpack-dev-server": "^3.2.1",
+		"webpack-merge": "^4.2.1"
+	},
+	"dependencies": {},
+	"author": "Max Hegler",
+	"license": "MIT"
+}
