@@ -59,79 +59,26 @@ class Client {
 			throw new TypeError( '[MSAPI][Client].setState - `state` is undefined.' );
 		}
 
-		const dynamicSetTests = [
-			{
-				pattern: /^sort\.(.*)$/,
-				fn: 'sort',
-				match: 1
-			},
-			{
-				pattern: /^filter\.(.*)$/,
-				fn: 'filter',
-				match: 1
-			},
-			{
-				pattern: /^bgfilter\.(.*)$/,
-				fn: 'backgroundFilter',
-				match: 1
-			}
-		];
-
 		for ( let prop in state ) {
 
 			let value = state[ prop ];
 
 			switch( prop ) {
-				case 'q': {
+				case 'Search': {
 					this.query( value );
 					break;
 				}
-				case 'resultsPerPage': {
+				case 'Per_Page': {
 					this.perPage( value );
 					break;
 				}
-				case 'page': {
+				case 'Page': {
 					this.page( value );
 					break;
 				}
 				default: {
 
-					const testPassed = dynamicSetTests.some(( test ) => {
-						const match = prop.match( test.pattern );
-						if ( match ) {
-
-							if ( Array.isArray( value ) ) {
-								value.map(( filterValue ) => {
-
-									if ( filterValue != undefined ) {
-
-										this[ test.fn ]( match[ test.match ], filterValue );
-
-									}
-
-								});
-							}
-							else {
-
-								if ( value != undefined ) {
-
-									this[ test.fn ]( match[ test.match ], value );
-
-								}
-
-							}
-
-							return true;
-
-						}
-					});
-
-					if ( !testPassed ) {
-
-						this.other( prop, value );
-
-						break;
-					}
+					this.other( prop, value );
 
 				}
 			}

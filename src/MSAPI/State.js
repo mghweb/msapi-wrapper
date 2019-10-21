@@ -1,5 +1,4 @@
 const DEFAULT_PARAMS = {
-	resultsFormat: 'native'
 };
 
 class State {
@@ -41,15 +40,19 @@ class State {
 			let keyRoot = filter.field;
 
 			if ( Array.isArray( filter.value ) ) {
-				return {
-					...output,
-					...(filter.value[0] != undefined && { [ `${ keyRoot }.low` ]: filter.value[0] }),
-					...(filter.value[1] != undefined && { [ `${ keyRoot }.high` ]: filter.value[1] })
-				};
+
+				if ( filter.value[0] != undefined && filter.value[1] != undefined ) {
+
+					output[ keyRoot ] = `${ filter.value[0] }-${ filter.value[1] }`;
+
+				}
+
 			}
 			else {
+
 				output[ keyRoot ] = output[ keyRoot ] || [];
 				output[ keyRoot ].push( filter.value );
+
 			}
 
 			return output;
@@ -59,6 +62,8 @@ class State {
 	}
 
 	addFilter( field, value ) {
+
+		console.log( 'add', field, value );
 
 		if ( field == undefined ) {
 			throw new TypeError( '[MSAPI][State].addFilter - `field` is undefined.' );
@@ -79,6 +84,8 @@ class State {
 	}
 
 	removeFilter( field, value ) {
+
+		console.log( 'remove', field, value );
 
 		if ( field == undefined ) {
 			throw new TypeError( '[MSAPI][State].removeFilter - `field` is undefined.' );
@@ -144,7 +151,7 @@ class State {
 		const offset = ((n - 1) * this.params.Per_Page);
 
 		this.params.Offset = offset;
-		this.params.Search_Offset = offset;
+		this.params.SearchOffset = offset;
 
 		return this;
 
@@ -169,9 +176,7 @@ class State {
 
 	clearFacets() {
 
-		this.filters = this.filters.filter(( filter ) => {
-			return !( filter.type == 'filter' );
-		});
+		this.filters = [];
 
 		return this;
 
@@ -180,7 +185,7 @@ class State {
 	other( key, value ) {
 
 		if ( key == undefined ) {
-			throw new TypeError( '[MSAPI][State].other - "key" is undefined.' );
+			throw new TypeError( '[MSAPI][State].other - `key` is undefined.' );
 		}
 
 		this.params[ key ] = value;
