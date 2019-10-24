@@ -28,24 +28,43 @@
 			display: -ms-flex;
 			display: -o-flex;
 			display: flex;
-			-webkit-flex-flow: row wrap;
-			-moz-flex-flow: row wrap;
-			-ms-flex-flow: row wrap;
-			-o-flex-flow: row wrap;
-			flex-flow: row wrap;
+			-webkit-flex-flow: row nowrap;
+			-moz-flex-flow: row nowrap;
+			-ms-flex-flow: row nowrap;
+			-o-flex-flow: row nowrap;
+			flex-flow: row nowrap;
 		}
 
 		.col {
-			-webkit-flex: 0 0 auto;
-			-moz-flex: 0 0 auto;
-			-ms-flex: 0 0 auto;
-			-o-flex: 0 0 auto;
-			flex: 0 0 auto;
+			-webkit-flex: 0 1 auto;
+			-moz-flex: 0 1 auto;
+			-ms-flex: 0 1 auto;
+			-o-flex: 0 1 auto;
+			flex: 0 1 auto;
 
+			min-width: 300px;
+		
 			border: 1px solid;
 			margin: 0 0.5rem 1rem 0.5rem;
 			padding: 0.5rem;
 		}
+
+		.stretch {
+			-webkit-flex: 1 1 auto;
+			-moz-flex: 1 1 auto;
+			-ms-flex: 1 1 auto;
+			-o-flex: 1 1 auto;
+			flex: 1 1 auto;
+		}
+
+		.inline-list {
+			list-style: none;
+		}
+
+			.inline-list li {
+				display: inline-block;
+				margin-left: 1rem;
+			}
 
 		img {
 			max-height: 50px;
@@ -62,8 +81,7 @@
 	<script defer src="./demo.js"></script>
 
 	<div id="MSAPIDemo">
-		<search-results></search-results>
-		<search-pagination></search-pagination>
+		<search-app></search-app>
 	</div>
 	
 </body>
