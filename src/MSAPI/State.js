@@ -1,4 +1,5 @@
 const DEFAULT_PARAMS = {
+	Search: '%'
 };
 
 class State {
