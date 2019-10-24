@@ -27,19 +27,35 @@
 
 <mvt:else>
 
+<mvt:comment> Define some pagination helpers </mvt:comment>
+<mvt:assign name="g.NextOffset" value="g.Offset + l.settings:search_results:per_page" />
+
+<mvt:comment> Process background filters </mvt:comment>
+<mvt:if expr="g.Background_Filters">
+	
+	<mvt:comment> Parse the list of background filters </mvt:comment>
+	<mvt:assign name="l.background_filters" value="miva_array_deserialize( g.Background_Filters )" />
+	
+	<mvt:comment> Filter out passed background filters </mvt:comment>
+	<mvt:assign name="l.index" value="miva_array_filter( l.settings:facets:facets, 0, l.facet, 'NOT miva_array_find( l.facet:code, l.background_filters, 0 )', l.settings:facets:facets )" />
+	<mvt:assign name="l.index" value="miva_array_filter( l.settings:facets:applied_facets, 0, l.facet, 'NOT miva_array_find( l.facet:code, l.background_filters, 0 )', l.settings:facets:applied_facets )" />
+
+</mvt:if>
+
 {
 	"pagination": {
 		"total_results": &mvtj:search_results:total_prod_count;,
+		"results_on_page": &mvtj:search_results:products_on_page_count;,
 		"begin": <mvt:eval expr="g.Offset + 1" />,
-		"end": <mvt:eval expr="(g.Offset + 1) + l.settings:search_results:products_on_page_count" />,
-		"current_page": &mvtj:search_results:page_links:current_page;,
-		"total_pages": &mvtj:search_results:page_links:last_page;,
-		"previous_page": <mvt:eval expr="(g.Offset / l.settings:search_results:per_page)" />,
-		"next_page": <mvt:if expr="g.Offset LT l.settings:search_results:total_prod_count">0<mvt:else><mvt:eval expr="(g.Offset / l.settings:search_results:per_page) + 2" /></mvt:if>,
+		"end": <mvt:eval expr="g.Offset + l.settings:search_results:products_on_page_count" />,
+		"current_page": <mvt:if expr="l.settings:search_results:page_links:current_page GT 0">&mvtj:search_results:page_links:current_page;<mvt:else>0</mvt:if>,
+		"total_pages": <mvt:if expr="l.settings:search_results:page_links:last_page GT 0">&mvtj:search_results:page_links:last_page;<mvt:else>0</mvt:if>,
+		"previous_page": <mvt:eval expr="(l.settings:search_results:page_links:current_page - 1)" />,
+		"next_page": <mvt:if expr="g.NextOffset GE l.settings:search_results:total_prod_count">0<mvt:else><mvt:eval expr="(l.settings:search_results:page_links:current_page + 1)" /></mvt:if>,
 		"per_page": &mvtj:search_results:per_page;,
 		"default_per_page": &mvtj:facets:per_page;,
-		"current_offset": <mvt:if expr="g.Offset">&mvtj:global:Offset;<mvt:else>0</mvt:if>,
-		"next_offset": <mvt:if expr="g.Offset LT l.settings:search_results:total_prod_count">0<mvt:else><mvt:eval expr="g.Offset + l.settings:search_results:per_page" /></mvt:if>
+		"current_offset": &mvtj:global:Offset;,
+		"next_offset": <mvt:if expr="g.NextOffset GE l.settings:search_results:total_prod_count">0<mvt:else>&mvtj:global:NextOffset;</mvt:if>
 	},
 	"sorting": {
 		"default_option": "&mvtj:facets:default_sort;",
@@ -92,9 +108,9 @@
 			}
 		]
 	},
-	"results": <mvt:do file="g.Module_JSON" name="l.success" value="JSON_Output( l.settings:search_results:products )" />,
-	"facets": <mvt:do file="g.Module_JSON" name="l.success" value="JSON_Output( l.settings:facets:facets )" />,
-	"applied_facets": <mvt:do file="g.Module_JSON" name="l.success" value="JSON_Output( l.settings:facets:applied_facets )" />
+	"results": <mvt:if expr="len_var( l.settings:search_results:products )"><mvt:do file="g.Module_JSON" name="l.success" value="JSON_Output( l.settings:search_results:products )" /><mvt:else>[]</mvt:if>,
+	"facets": <mvt:if expr="len_var( l.settings:facets:facets )"><mvt:do file="g.Module_JSON" name="l.success" value="JSON_Output( l.settings:facets:facets )" /><mvt:else>[]</mvt:if>,
+	"applied_facets": <mvt:if expr="len_var( l.settings:facets:applied_facets )"><mvt:do file="g.Module_JSON" name="l.success" value="JSON_Output( l.settings:facets:applied_facets )" /><mvt:else>[]</mvt:if>
 }
 
 </mvt:if>]]></Template>

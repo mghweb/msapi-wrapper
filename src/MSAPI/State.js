@@ -38,7 +38,10 @@ class State {
 
 		return this.filters.reduce(( output, filter ) => {
 
+			let backgroundFilterRegex = new RegExp( `(^${ filter.field })|(,${ filter.field })` );
+
 			let keyRoot = filter.field;
+			let backgroundFiltersKey = 'Background_Filters';
 
 			if ( Array.isArray( filter.value ) ) {
 
@@ -56,15 +59,27 @@ class State {
 
 			}
 
+			if ( filter.backgroundFilter ) {
+
+				let backgroundFilterOutput = output[ backgroundFiltersKey ] || '';
+
+				if ( !backgroundFilterRegex.test( backgroundFilterOutput ) ) {
+
+					backgroundFilterOutput += (( backgroundFilterOutput.length == 0 ) ? '' : ',') + filter.field;
+
+				}
+
+				output[ backgroundFiltersKey ] = backgroundFilterOutput;
+
+			}
+
 			return output;
 
 		}, {});
 
 	}
 
-	addFilter( field, value ) {
-
-		console.log( 'add', field, value );
+	addFilter( field, value, backgroundFilter = false ) {
 
 		if ( field == undefined ) {
 			throw new TypeError( '[MSAPI][State].addFilter - `field` is undefined.' );
@@ -75,7 +90,8 @@ class State {
 
 		const filter = {
 			field: field,
-			value: value
+			value: value,
+			backgroundFilter: backgroundFilter 
 		};
 
 		this.filters.push( filter );
@@ -84,9 +100,7 @@ class State {
 
 	}
 
-	removeFilter( field, value ) {
-
-		console.log( 'remove', field, value );
+	removeFilter( field, value, backgroundFilter = false ) {
 
 		if ( field == undefined ) {
 			throw new TypeError( '[MSAPI][State].removeFilter - `field` is undefined.' );
@@ -98,6 +112,7 @@ class State {
 		this.filters = this.filters.filter(( filter ) => {
 			return !(
 				filter.field == field &&
+				filter.backgroundFilter == backgroundFilter &&
 				this._compareFilterValues( filter.value, value )
 			);
 		});
@@ -106,7 +121,7 @@ class State {
 
 	}
 
-	toggleFilter( field, value ) {
+	toggleFilter( field, value, backgroundFilter = false ) {
 
 		if ( field == undefined ) {
 			throw new TypeError( '[MSAPI][State].toggleFilter - `field` is undefined.' );
@@ -123,10 +138,10 @@ class State {
 		});
 
 		if ( foundFilter ) {
-			return this.removeFilter( field, value );
+			return this.removeFilter( field, value, backgroundFilter );
 		}
 		else {
-			return this.addFilter( field, value );
+			return this.addFilter( field, value, backgroundFilter );
 		}
 
 	}
