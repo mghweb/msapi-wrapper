@@ -72,13 +72,21 @@ class Client {
 					this.perPage( value );
 					break;
 				}
-				case 'Page': {
-					this.page( value );
+				case 'SearchOffset': {
+					this.other( prop, value );
+					break;
+				}
+				case 'Offset': {
+					this.other( prop, value );
+					break;
+				}
+				case 'Sort_By': {
+					this.other( prop, value );
 					break;
 				}
 				default: {
 
-					this.other( prop, value );
+					this.facet( prop, value );
 
 				}
 			}

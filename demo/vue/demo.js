@@ -10,13 +10,28 @@
 		{
 			data: function() {
 				return {
-					searchData: {}
+					searchData: {},
+					query: searchApi.state.params.Search
 				}
 			},
 			created: function() {
 
+				// set state from URL
+				searchApi.setState( this.$route.query )
+
 				// bind event listener
-				searchApi.on( 'search', ( data ) => { this.searchData = data; } );
+				searchApi.on( 'search', function( data, response, requestParams ) {
+
+					// define props to trickle down
+					this.searchData = data;
+					this.query = searchApi.state.params.Search;
+
+					// push to vue router
+					this.$router.push( { query: requestParams } ).catch(function( err ) {
+						return {};
+					});
+
+				}.bind( this ));
 
 				// run default search
 				searchApi.search();
@@ -31,10 +46,10 @@
 					</div>
 					<div class="row">
 						<aside class="col">
-							<search-facets :facets="searchData.facets"></search-facets>
+							<search-facets :facets="searchData.facets" :applied-facets="searchData.applied_facets"></search-facets>
 						</aside>
 						<main class="col stretch">
-							<search-results :results="searchData.results"></search-results>
+							<search-results :query="query" :results="searchData.results"></search-results>
 							<search-pagination :pagination="searchData.pagination"></search-pagination>
 						</main>
 					</div>
@@ -48,7 +63,7 @@
 		{
 			data: function() {
 				return {
-					query: '%'
+					query: ''
 				}
 			},
 			methods: {
@@ -56,7 +71,7 @@
 
 					$event.preventDefault();
 
-					searchApi.query( this.query ).search();
+					searchApi.query( ( this.query == '' ) ? '%' : this.query ).search();
 
 				}
 			},
@@ -78,17 +93,48 @@
 			props: {
 				facets: {
 					type: Array,
-					default: () => { return [] }
+					default: function() {
+						return [];
+					}
+				},
+				appliedFacets: {
+					type: Array,
+					default: function() {
+						return [];
+					}
+				}
+			},
+			methods: {
+				toggleFilter: function( code, value ) {
+
+					searchApi.filter( code, value ).search();
+
+				},
+				clearFacets: function() {
+
+					searchApi.clearFacets().search();
+
 				}
 			},
 			template: `
 				<div>
 					<strong>Search Facets:</strong>
-					<ol>
-						<li v-for="facet in facets">
-							{{ facet.name }}
-						</li>
-					</ol>
+					<a @click="clearFacets()" v-if="appliedFacets.length > 0">Clear Facets</a>
+					<div v-for="facet in facets">
+						<h5>{{ facet.name }}</h5>
+						<div v-if="facet.type == 'nested'">
+							<div v-for="appliedValue in facet.applied_values">
+								<a @click="toggleFilter( facet.code, appliedValue.value )">
+									<span class="red">{{ appliedValue.prompt }}</span>
+								</a>
+							</div>
+						</div>
+						<ul>
+							<li v-for="facetValue in facet.values">
+								<a @click="toggleFilter( facet.code, facetValue.value )" :class="{ red: ( facetValue.selected ) }">{{ facetValue.prompt }} ({{ facetValue.count }})</a>
+							</li>
+						</ul>
+					</div>
 				</div>
 			`
 		}
@@ -100,17 +146,27 @@
 			props: {
 				results: {
 					type: Array,
-					default: () => { return [] }
-				}
+					default: function() {
+						return [];
+					}
+				},
+				query: String
 			},
 			template: `
 				<div>
 					<strong>Search Results:</strong>
-					<ol>
-						<li v-for="result in results">
-							{{ result.name }}
-						</li>
-					</ol>
+					<div v-if="query != '%'">
+						<hr />
+						<span>Showing results for <em>{{ query }}</em>.</span>
+					</div>
+					<div class="row wrap">
+						<div v-for="result in results" class="col one-fourth">
+							<a :href="result.link" target="_blank">
+								<div>{{ result.name }}</div>
+								<strong>{{ result.price | toCurrency }}</strong>
+							</a>
+						</div>
+					</div>
 				</div>
 			`
 		}
@@ -122,7 +178,9 @@
 			props: {
 				pagination: {
 					type: Object,
-					default: () => { return {} }
+					default: function() {
+						return {};
+					}
 				}
 			},
 			methods: {
@@ -148,7 +206,22 @@
 
 	// ================================================== //
 
+	Vue.filter('toCurrency', function ( value ) {
+		if ( typeof value !== "number" ) {
+			return value;
+		}
+		var formatter = new Intl.NumberFormat('en-US', {
+			style: 'currency',
+			currency: 'USD',
+			minimumFractionDigits: 0
+		});
+		return formatter.format( value );
+	});
+
+	var router = new VueRouter();
+
 	var MSAPIDemo = new Vue({
+		router: router,
 		el: '#MSAPIDemo'
 	});
 
