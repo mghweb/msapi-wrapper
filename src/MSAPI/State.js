@@ -192,7 +192,9 @@ class State {
 
 	clearFacets() {
 
-		this.filters = [];
+		this.filters = this.filters.filter(( filter ) => {
+			return filter.backgroundFilter;
+		});
 
 		return this;
 
