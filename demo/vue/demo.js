@@ -17,7 +17,10 @@
 			created: function() {
 
 				// set state from URL
-				searchApi.setState( this.$route.query )
+				searchApi.setState( this.$route.query );
+
+				// set query
+				this.query = searchApi.state.params.Search;
 
 				// bind event listener
 				searchApi.on( 'search', function( data, response, requestParams ) {
@@ -27,7 +30,21 @@
 					this.query = searchApi.state.params.Search;
 
 					// push to vue router
-					this.$router.push( { query: requestParams } ).catch(function( err ) {
+					var paramBlacklist = [ /Background_Filters/ ];
+					var backgroundFilterList = requestParams.Background_Filters && requestParams.Background_Filters.split( ',' ).map(function( code ) {
+						return new RegExp( code );
+					}) || [];
+					paramBlacklist = paramBlacklist.concat( backgroundFilterList );
+					var params = Object.assign( {}, requestParams );
+					Object.keys( params ).forEach(function( param ) {
+						var test = paramBlacklist.some(function( expr ) {
+							return expr.test( param );
+						});
+						if ( test ) {
+							delete params[ param ];
+						}
+					});
+					this.$router.push( { query: params } ).catch(function( err ) {
 						return {};
 					});
 
