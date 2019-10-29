@@ -16,6 +16,8 @@
 			},
 			created: function() {
 
+				searchApi.backgroundFilter( 'color', 'Black' );
+
 				// set state from URL
 				searchApi.setState( this.$route.query );
 
@@ -62,6 +64,14 @@
 						</div>
 					</div>
 					<div class="row">
+						<div class="col stretch">
+							<search-per-page :pagination="searchData.pagination"></search-per-page>
+						</div>
+						<div class="col stretch">
+							<search-sorting :sorting="searchData.sorting"></search-sorting>
+						</div>
+					</div>
+					<div class="row">
 						<aside class="col">
 							<search-facets :facets="searchData.facets" :applied-facets="searchData.applied_facets"></search-facets>
 						</aside>
@@ -99,6 +109,74 @@
 						<input type="text" placeholder="Search..." v-model="query" />
 						<button>Go</button>
 					</form>
+				</div>
+			`
+		}
+	);
+
+	Vue.component(
+		'search-per-page',
+		{
+			data: function() {
+				return {
+					perPageList: [
+						25,
+						50,
+						100,
+						150
+					]
+				}
+			},
+			props: {
+				pagination: {
+					type: Object,
+					default: function() {
+						return {};
+					}
+				}
+			},
+			methods: {
+				perPage: function( n ) {
+
+					searchApi.perPage( n ).search();
+
+				}
+			},
+			template: `
+				<div>
+					<strong>Per Page:</strong>
+					<ul class="inline-list">
+						<li v-for="n in perPageList">
+							<a @click="perPage( n )" :class="{ red: ( n == pagination.per_page ) }">{{ n }}</a>
+						</li>
+					</ul>
+				</div>
+			`
+		}
+	);
+
+	Vue.component(
+		'search-sorting',
+		{
+			props: {
+				sorting: {
+					type: Object,
+					default: function() {
+						return {};
+					}
+				}
+			},
+			methods: {
+				perPage: function( n ) {
+
+					searchApi.perPage( n ).search();
+
+				}
+			},
+			template: `
+				<div>
+					<strong>Per Sorting:</strong>
+					{{ sorting }}
 				</div>
 			`
 		}
